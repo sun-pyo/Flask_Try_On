@@ -9,11 +9,15 @@ from torchvision import models
 from PIL import Image
 import json
 
+from clothes.clotehs_unet import Clothes_Unet
+
+
 app = Flask(__name__)
 run_with_ngrok(app)
 imagenet_class_index = json.load(open('imagenet_class_index.json'))
 model = models.densenet121(pretrained=True)
 model.eval()
+clothes_unet = Clothes_Unet()
 
 @app.route('/')
 def hello():
@@ -27,17 +31,10 @@ def get_image():
 @app.route('/api/test', methods=['POST'])
 def test():
     r = request
-    # convert string of image data to uint8
     nparr = np.fromstring(r.data, np.uint8)
-    # decode image
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-    # do some fancy processing here....
-
-    # build a response dict to send back to client
     response = {'message': 'image received. size={}x{}'.format(img.shape[1], img.shape[0])
                 }
-    # encode response using jsonpickle
     response_pickled = jsonpickle.encode(response)
 
     return Response(response=response_pickled, status=200, mimetype="application/json")
@@ -50,7 +47,7 @@ def transform_image(image_bytes):
                                         transforms.Normalize(
                                             [0.485, 0.456, 0.406],
                                             [0.229, 0.224, 0.225])])
-    image = Image.open(io.BytesIO(image_bytes))
+    image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
     return my_transforms(image).unsqueeze(0)
 
 
@@ -65,7 +62,7 @@ def get_prediction(image_bytes):
 @app.route('/predict', methods=['POST'])
 def predict():
     if request.method == 'POST':
-        file = request.files['file']
+        file = request.files['image']
         img_bytes = file.read()
         class_id, class_name = get_prediction(image_bytes=img_bytes)
         return jsonify({'class_id': class_id, 'class_name': class_name})
