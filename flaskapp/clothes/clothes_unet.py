@@ -7,13 +7,13 @@ import io
 import torch
 from torchvision import transforms
 
-from unet import UNet
+from .unet import UNet
 
 class Clothes_Unet:
     def __init__(self):
-        self.model_path = "img/model/clothes_unet.pth"
-        self.clothes_path = "img/clothes"
-        self.mask_path = "img/mask"
+        self.model_path = "flaskapp/model/clothes_unet.pth"
+        self.clothes_path = "flaskapp/img/clothes"
+        self.mask_path = "flaskapp/img/mask"
         self.scale = 0.5
         self.out_threshold = 0.5
         self.net = UNet(n_channels=3, n_classes=1)
@@ -25,22 +25,22 @@ class Clothes_Unet:
         logging.info("Clothes Unet Model loaded !")
         self.net.eval()
 
-    def get_filename():
-        return "1.png"
+    def get_filename(self):
+        return "1"
 
     def mask_to_image(self, mask):
         return Image.fromarray((mask * 255).astype(np.uint8))
 
-    def img_resize(self, image, file_name,img_width = 192,img_high=256, width=256, hight=256):
+    def img_resize(self, image, img_width = 192, img_high=256, width=256, hight=256):
         diff = (width - img_width)//2
         image = cv2.resize(image, (img_width, img_high))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        cv2.imwrite(self.clothes_path + '/' + file_name + '.png')
+        image_cpy = image.copy()
         im = np.ones((width, hight, 3), dtype=np.uint8) * 255
         im[:, diff:diff+img_width, :] = image
-        return Image.fromarray(im)
+        return Image.fromarray(im), image_cpy
 
-    def remove_padding(image ,img_width = 192, img_high=256, width=256, hight=256, padding_color="white"):
+    def remove_padding(self, image ,img_width = 192, img_high=256, width=256, hight=256, padding_color="white"):
         diff = (width - img_width)//2
         image = image[:, diff:diff+img_width]
         k = cv2.getStructuringElement(cv2.MORPH_RECT, (7,7))
@@ -92,14 +92,18 @@ class Clothes_Unet:
 
     def predict(self, image_bytes):
         img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-        filename = self.get_filename()
-        img = self.img_resize(np.array(img), filename)
+        img, img_cpy = self.img_resize(np.array(img))
 
         mask = self.predict_img(full_img=img)
 
         result = self.mask_to_image(mask)
         result = self.remove_padding(np.array(result))
         
+        filename = self.get_filename()
+        
+        input_path = self.clothes_path + '/' + filename + '.png'
         output_file = self.mask_path + '/' + filename + '.png'
+
+        cv2.imwrite(input_path, img_cpy)
         result.save(output_file)
         logging.info("Mask saved to {}".format(output_file))

@@ -9,7 +9,7 @@ from torchvision import models
 from PIL import Image
 import json
 
-from clothes.clotehs_unet import Clothes_Unet
+from .clothes.clothes_unet import Clothes_Unet
 
 
 app = Flask(__name__)
@@ -27,18 +27,6 @@ def hello():
 def get_image():
     filename = 'clothes104.jpg'
     return send_file(filename, mimetype='image/jpg')
-
-@app.route('/api/test', methods=['POST'])
-def test():
-    r = request
-    nparr = np.fromstring(r.data, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    response = {'message': 'image received. size={}x{}'.format(img.shape[1], img.shape[0])
-                }
-    response_pickled = jsonpickle.encode(response)
-
-    return Response(response=response_pickled, status=200, mimetype="application/json")
-
 
 def transform_image(image_bytes):
     my_transforms = transforms.Compose([transforms.Resize(255),
@@ -58,6 +46,14 @@ def get_prediction(image_bytes):
     predicted_idx = str(y_hat.item())
     return imagenet_class_index[predicted_idx]
 
+@app.route('/inference_clothes', methods=['POST'])
+def inference_clothes():
+    if request.method == 'POST':
+        file = request.files['image']
+        print(request.form.get('filename'))
+        img_bytes = file.read()
+        clothes_unet.predict(img_bytes)
+        return 'Ok'
 
 @app.route('/predict', methods=['POST'])
 def predict():
