@@ -49,12 +49,14 @@ def inference_clothes():
         # get clothes filename
         filename = filemanager.get_clothes_filename()  
         # RGB image load
-        image = filemanager.bytes_image_open(img_bytes, filename)
+        image = filemanager.bytes_image_open(img_bytes)
+        # save clothes image
+        filemanager.save_clothes(image, filename) 
         #print(request.form.get('filename'))
-        clothes_unet.predict(image)
+        clothes_unet.predict(image, filename)
         return 'Ok'
 
-@app.route('/inference_human')
+@app.route('/inference_human', methods=['POST'])
 def inference_human():
     if request.method == 'POST':
         file = request.files['image']
@@ -62,8 +64,10 @@ def inference_human():
         # get human filename
         filename = filemanager.get_human_filename() 
         # RGB image load
-        image = filemanager.bytes_image_open(img_bytes, filename)
-        openpose.predict(image)
+        image = filemanager.bytes_image_open(img_bytes)
+        filemanager.save_human(image, filename)
+
+        openpose.predict(image, filename)
         return 'Ok'
 
 def get_prediction(image_bytes):

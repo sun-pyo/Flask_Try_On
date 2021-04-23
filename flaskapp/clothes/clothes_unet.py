@@ -29,12 +29,12 @@ class Clothes_Unet:
 
     def img_resize(self, image, img_width = 192, img_high=256, width=256, hight=256):
         diff = (width - img_width)//2
-        image = cv2.resize(image, (img_width, img_high))
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image_cpy = image.copy()
+        #image = cv2.resize(image, (img_width, img_high))
+        #image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        #image_cpy = image.copy()
         im = np.ones((width, hight, 3), dtype=np.uint8) * 255
         im[:, diff:diff+img_width, :] = image
-        return Image.fromarray(im), image_cpy
+        return Image.fromarray(im)
 
     def remove_padding(self, image ,img_width = 192, img_high=256, width=256, hight=256, padding_color="white"):
         diff = (width - img_width)//2
@@ -88,7 +88,7 @@ class Clothes_Unet:
 
     def predict(self, img, filename):
         # resize (256,256)
-        img, img_cpy = self.img_resize(np.array(img))
+        img = self.img_resize(np.array(img))
 
         # forward
         mask = self.predict_img(full_img=img)
@@ -98,7 +98,5 @@ class Clothes_Unet:
         # resize (192, 256)
         result = self.remove_padding(np.array(result))
         
-        # save clothes image
-        self.filemanager.save_clothes(img_cpy, filename)   
         # save clothes mask image
         self.filemanager.save_mask(np.array(result), filename)  
