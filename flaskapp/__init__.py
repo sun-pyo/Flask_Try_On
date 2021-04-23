@@ -2,7 +2,6 @@ from flask import Flask, jsonify, send_file, request, Response, make_response
 from flask_ngrok import run_with_ngrok
 import numpy as np
 import cv2
-import jsonpickle
 import io
 import torchvision.transforms as transforms
 from torchvision import models
@@ -10,14 +9,18 @@ from PIL import Image
 import json
 
 from .clothes.clothes_unet import Clothes_Unet
-
+from .util.file import FileManager
+from .human.openpose import OpenPose
 
 app = Flask(__name__)
 run_with_ngrok(app)
 imagenet_class_index = json.load(open('imagenet_class_index.json'))
 model = models.densenet121(pretrained=True)
 model.eval()
-clothes_unet = Clothes_Unet()
+
+filemanager = FileManager()
+clothes_unet = Clothes_Unet(filemanager)
+openpose = OpenPose(filemanager)
 
 @app.route('/')
 def hello():
@@ -38,6 +41,30 @@ def transform_image(image_bytes):
     image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
     return my_transforms(image).unsqueeze(0)
 
+@app.route('/inference_clothes', methods=['POST'])
+def inference_clothes():
+    if request.method == 'POST':
+        file = request.files['image']
+        img_bytes = file.read()
+        # get clothes filename
+        filename = filemanager.get_clothes_filename()  
+        # RGB image load
+        image = filemanager.bytes_image_open(img_bytes, filename)
+        #print(request.form.get('filename'))
+        clothes_unet.predict(image)
+        return 'Ok'
+
+@app.route('/inference_human')
+def inference_human():
+    if request.method == 'POST':
+        file = request.files['image']
+        img_bytes = file.read()
+        # get human filename
+        filename = filemanager.get_human_filename() 
+        # RGB image load
+        image = filemanager.bytes_image_open(img_bytes, filename)
+        openpose.predict(image)
+        return 'Ok'
 
 def get_prediction(image_bytes):
     tensor = transform_image(image_bytes=image_bytes)
@@ -45,15 +72,6 @@ def get_prediction(image_bytes):
     _, y_hat = outputs.max(1)
     predicted_idx = str(y_hat.item())
     return imagenet_class_index[predicted_idx]
-
-@app.route('/inference_clothes', methods=['POST'])
-def inference_clothes():
-    if request.method == 'POST':
-        file = request.files['image']
-        print(request.form.get('filename'))
-        img_bytes = file.read()
-        clothes_unet.predict(img_bytes)
-        return 'Ok'
 
 @app.route('/predict', methods=['POST'])
 def predict():

@@ -8,12 +8,10 @@ import numpy as np
 import json 
 
 class OpenPose:
-    def __init__(self):
+    def __init__(self, filemanager):
         self.model = BodyPoseEstimator(pretrained=True)
         self.pose_path = 'flasapp/img/pose'
-
-    def get_filename(self):
-        return "1"
+        self.filemanager = filemanager
 
     def predict(self, image, filename):
         keypoints = self.model(image)
@@ -32,5 +30,4 @@ class OpenPose:
                     "hand_left_keypoints":[],
                     }]}
 
-        with open(self.pose_path + filename, 'w') as outfile:
-            json.dump(json_data, outfile)
+        self.filemanager.save_pose(json_data, filename)

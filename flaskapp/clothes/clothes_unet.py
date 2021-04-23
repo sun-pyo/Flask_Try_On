@@ -10,10 +10,9 @@ from torchvision import transforms
 from .unet import UNet
 
 class Clothes_Unet:
-    def __init__(self):
+    def __init__(self, filemanager):
+        self.filemanager = filemanager
         self.model_path = "flaskapp/model/clothes_unet.pth"
-        self.clothes_path = "flaskapp/img/clothes"
-        self.mask_path = "flaskapp/img/mask"
         self.scale = 0.5
         self.out_threshold = 0.5
         self.net = UNet(n_channels=3, n_classes=1)
@@ -24,9 +23,6 @@ class Clothes_Unet:
         self.net.load_state_dict(torch.load(self.model_path, map_location=self.device))
         logging.info("Clothes Unet Model loaded !")
         self.net.eval()
-
-    def get_filename(self):
-        return "1"
 
     def mask_to_image(self, mask):
         return Image.fromarray((mask * 255).astype(np.uint8))
@@ -90,20 +86,19 @@ class Clothes_Unet:
             full_mask = probs.squeeze().cpu().numpy()
         return full_mask > self.out_threshold
 
-    def predict(self, image_bytes):
-        img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+    def predict(self, img, filename):
+        # resize (256,256)
         img, img_cpy = self.img_resize(np.array(img))
 
+        # forward
         mask = self.predict_img(full_img=img)
 
         result = self.mask_to_image(mask)
+
+        # resize (192, 256)
         result = self.remove_padding(np.array(result))
         
-        filename = self.get_filename()
-        
-        input_path = self.clothes_path + '/' + filename + '.png'
-        output_file = self.mask_path + '/' + filename + '.png'
-
-        cv2.imwrite(input_path, img_cpy)
-        result.save(output_file)
-        logging.info("Mask saved to {}".format(output_file))
+        # save clothes image
+        self.filemanager.save_clothes(img_cpy, filename)   
+        # save clothes mask image
+        self.filemanager.save_mask(np.array(result), filename)  
