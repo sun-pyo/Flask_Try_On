@@ -19,6 +19,7 @@ class Human_Parsing:
     def __init__(self, filemanager):
         self.filemanager = filemanager
         self.input_size = [473, 473]
+        self.aspect_ratio = self.input_size[1] * 1.0 / self.input_size[0]
         num_class = 20
         self.model_path = "flaskapp/model/human_parsing.pth"
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -50,6 +51,11 @@ class Human_Parsing:
             15:13
         }
 
+        self.transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.406, 0.456, 0.485], std=[0.225, 0.224, 0.229])
+        ])
+
     def _xywh2cs(self, x, y, w, h):
         center = np.zeros((2), dtype=np.float32)
         center[0] = x + w * 0.5
@@ -80,8 +86,8 @@ class Human_Parsing:
             flags=cv2.INTER_LINEAR,
             borderMode=cv2.BORDER_CONSTANT,
             borderValue=(0, 0, 0))
-
         input = self.transform(input)
+        input = input.unsqueeze(0)
         meta = {
             'center': person_center,
             'height': h,
@@ -97,11 +103,11 @@ class Human_Parsing:
     def predict(self, img, filename):
         with torch.no_grad():
             image, meta = self.get_data(img)
-            c = meta['center'].numpy()[0]
-            s = meta['scale'].numpy()[0]
-            w = meta['width'].numpy()[0]
-            h = meta['height'].numpy()[0]
-
+            c = meta['center']
+            s = meta['scale']
+            w = meta['width']
+            h = meta['height']
+            
             output = self.model(image.cuda())
             upsample = torch.nn.Upsample(size=self.input_size, mode='bicubic', align_corners=True)
             upsample_output = upsample(output[0][-1][0].unsqueeze(0))
