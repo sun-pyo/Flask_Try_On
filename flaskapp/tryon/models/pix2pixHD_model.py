@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import os
 from torch.autograd import Variable
-from util.image_pool import ImagePool
+from ..util.image_pool import ImagePool
 import torch.nn as nn
 
 import cv2

@@ -1,24 +1,16 @@
 import sys
 sys.path.append('../')
 
-import cv2
 from openpose.body.estimator import BodyPoseEstimator
-from openpose.utils import draw_body_connections, draw_keypoints
-import numpy as np
-import torch
-import json 
+
 
 class OpenPose:
     def __init__(self, filemanager):
         self.model = BodyPoseEstimator(pretrained=True)
         self.filemanager = filemanager
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model.to(device=self.device)
-        self.model.eval()
-
 
     def predict(self, image, filename):
-        keypoints = self.model(image.to(device=self.device))
+        keypoints = self.model(image)
         pose_keypoints = []
 
         if len(keypoints) > 0:

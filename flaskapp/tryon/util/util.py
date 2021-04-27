@@ -3,8 +3,7 @@ import os
 from PIL import Image
 import numpy as np
 import torch
-
-print('?')
+import cv2 
 
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
@@ -71,6 +70,7 @@ def tensor_to_image(img_tensor, grayscale=False):
         array = array.squeeze(0)
     elif array.shape[0] == 3:
         array = array.swapaxes(0, 1).swapaxes(1, 2)
+        array = cv2.cvtColor(array, cv2.COLOR_BGR2RGB)
 
     return array
 

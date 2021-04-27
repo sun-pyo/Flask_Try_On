@@ -3,9 +3,9 @@ import torch
 from torch.autograd import Variable
 
 from .options.test_options import TestOptions
-from .model.pix2pixHD_model import InferenceModel
+from .models.pix2pixHD_model import InferenceModel
 from .data.data import *
-import util.util as util
+from .util import util
 
 
 SIZE = 320
@@ -68,9 +68,9 @@ class ACGPN():
             pose_map[i] = one_map[0]
         pose_tensor = pose_map
 
-        input_dict = {'parse': parse_tensor, 'human': human_tensor,
-                        'mask': mask_tensor, 'clothes': clothes_tensor, 
-                        'pose': pose_tensor
+        input_dict = {'parse': parse_tensor.unsqueeze(0), 'human': human_tensor.unsqueeze(0),
+                        'mask': mask_tensor.unsqueeze(0), 'clothes': clothes_tensor.unsqueeze(0), 
+                        'pose': pose_tensor.unsqueeze(0)
                     }
 
         return input_dict
@@ -100,5 +100,5 @@ class ACGPN():
         # Restore Background 
         fake_image = fake_image*mask_fore.cuda() + img_back.cuda()
 
-        output = util.tensor_to_image(fake_image)
+        output = util.tensor_to_image(fake_image[0])
         return output
