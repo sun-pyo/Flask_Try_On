@@ -9,12 +9,11 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
-import networks
 import logging
-from utils.transforms import transform_logits
-from utils.transforms import get_affine_transform
+from .utils.transforms import transform_logits
+from .utils.transforms import get_affine_transform
 from collections import OrderedDict
-from networks.AugmentCE2P import resnet101
+from .networks.AugmentCE2P import resnet101
 
 class Human_Parsing:
     def __init__(self, filemanager):
