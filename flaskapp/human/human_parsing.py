@@ -1,12 +1,8 @@
-import os
 import torch
-import argparse
 import cv2
 import numpy as np
 from PIL import Image
-from tqdm import tqdm
 
-from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
 import logging
@@ -108,7 +104,7 @@ class Human_Parsing:
             w = meta['width']
             h = meta['height']
             
-            output = self.model(image.cuda())
+            output = self.model(image.to(device=self.device))
             upsample = torch.nn.Upsample(size=self.input_size, mode='bicubic', align_corners=True)
             upsample_output = upsample(output[0][-1][0].unsqueeze(0))
             upsample_output = upsample_output.squeeze()

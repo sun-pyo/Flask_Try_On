@@ -61,6 +61,35 @@ class FileManager:
         parse_path = self.parse_root + '/' + filename + '.png'
         image.save(parse_path)
 
+    def load_clothes(self, filename):
+        clothes_path = self.clothes_root + '/' + filename + '.png'
+        clothes = Image.open(clothes_path).convert('RGB')
+        return clothes
+
+    def load_mask(self, filename):
+        mask_path = self.mask_root + '/' + filename + '.png'
+        mask = Image.open(mask_path).convert('L')
+        return mask
+
+    def load_pose(self, filename):
+        pose_path = self.pose_root + '/' + filename + '.json'
+        with open(pose_path, 'r') as f:
+            pose_label = json.load(f)
+            pose_data = pose_label['people'][0]['pose_keypoints']
+            pose_data = np.array(pose_data)
+            pose_data = pose_data.reshape((-1, 3))
+        return pose_data
+
+    def load_human(self, filename):
+        human_path = self.human_root + '/' + filename + '.png'
+        human = Image.open(human_path).convert('RGB')
+        return human
+
+    def load_human_parse(self, filename):
+        parse_path = self.parse_root + '/' + filename + '.png'
+        parse = Image.open(parse_path).convert('L')
+        return parse
+
     def remove_human(self, filename):
         human_path = self.human_root + '/' + filename + '.png'
         pose_path = self.pose_root + '/' + filename + '.json'
@@ -71,3 +100,11 @@ class FileManager:
             os.remove(pose_path)
         if os.path.isfile(parse_path):
             os.remove(parse_path)
+
+    def remove_clothes(self, filename):
+        clothes_path = self.clothes_root + '/' + filename + '.png'
+        mask_path = self.mask_root + '/' + filename + '.png'
+        if os.path.isfile(clothes_path):
+            os.remove(clothes_path)
+        if os.path.isfile(mask_path):
+            os.remove(mask_path)

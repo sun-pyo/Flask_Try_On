@@ -12,6 +12,7 @@ from .clothes.clothes_unet import Clothes_Unet
 from .util.file import FileManager
 from .human.openpose import OpenPose
 from .human.human_parsing import Human_Parsing
+from .tryon.acgpn import ACGPN
 
 app = Flask(__name__)
 run_with_ngrok(app)
@@ -23,6 +24,7 @@ filemanager = FileManager()
 clothes_unet = Clothes_Unet(filemanager=filemanager)
 openpose = OpenPose(filemanager=filemanager)
 human_parsing = Human_Parsing(filemanager=filemanager)
+acgpn = ACGPN(filemanager=filemanager)
 
 @app.route('/')
 def hello():
@@ -75,35 +77,20 @@ def inference_human():
         openpose.predict(image, filename)
         return 'Ok'
 
-def get_prediction(image_bytes):
-    tensor = transform_image(image_bytes=image_bytes)
-    outputs = model.forward(tensor)
-    _, y_hat = outputs.max(1)
-    predicted_idx = str(y_hat.item())
-    return imagenet_class_index[predicted_idx]
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    if request.method == 'POST':
-        file = request.files['image']
-        img_bytes = file.read()
-        class_id, class_name = get_prediction(image_bytes=img_bytes)
-        return jsonify({'class_id': class_id, 'class_name': class_name})
-
-@app.route('/predict', methods=['GET'])
-def predict_get():
-    with open("clothes104.jpg", 'rb') as f:
-        image_bytes = f.read()
-        print(get_prediction(image_bytes=image_bytes))
-    img = cv2.imread('clothes104.jpg')
-    img_str = cv2.imencode('.png', img)[1].tostring()
+@app.route('/tryon', methods=['GET'])
+def tryon():
+    c_name = request.args.get('c')
+    h_name = request.args.get('h')
+    output = acgpn.predict(c_name, h_name)
+    
+    img_str = cv2.imencode('.png', output)[1].tostring()
     f = io.BytesIO()
     f.write(img_str)
     f.seek(0)
     #return Response(bytes, mimetype='image/jpeg')
     return send_file(f, mimetype='image/png')
 
-@app.route('/image')
+@app.route('/image', methods=['GET'])
 def image():
     img = cv2.imread('clothes104.jpg')
     data = cv2.imencode('.png', img)[1].tobytes()

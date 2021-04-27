@@ -3,6 +3,4 @@
 __pycache__/
 */__pycache__/
 
-clothes104.png
-imagenet_class_index.json
-test.py
+/test/
