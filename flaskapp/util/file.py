@@ -57,6 +57,10 @@ class FileManager:
         cv2.imwrite(human_path, image)
         print(human_path, 'save!')
 
+    def save_human_parsing(self, image, filename):
+        parse_path = self.parse_root + '/' + filename + '.png'
+        image.save(parse_path)
+
     def remove_human(self, filename):
         human_path = self.human_root + '/' + filename + '.png'
         pose_path = self.pose_root + '/' + filename + '.json'

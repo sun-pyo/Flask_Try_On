@@ -11,6 +11,7 @@ import json
 from .clothes.clothes_unet import Clothes_Unet
 from .util.file import FileManager
 from .human.openpose import OpenPose
+from .human.human_parsing import Human_Parsing
 
 app = Flask(__name__)
 run_with_ngrok(app)
@@ -19,8 +20,9 @@ model = models.densenet121(pretrained=True)
 model.eval()
 
 filemanager = FileManager()
-clothes_unet = Clothes_Unet(filemanager)
-openpose = OpenPose(filemanager)
+clothes_unet = Clothes_Unet(filemanager=filemanager)
+openpose = OpenPose(filemanager=filemanager)
+human_parsing = Human_Parsing(filemanager=filemanager)
 
 @app.route('/')
 def hello():
@@ -65,8 +67,11 @@ def inference_human():
         filename = filemanager.get_human_filename() 
         # RGB image load
         image = filemanager.bytes_image_open(img_bytes)
+        # human image save
         filemanager.save_human(image, filename)
-
+        # human parsing
+        human_parsing.predict(image, filename)
+        # human pose estimation
         openpose.predict(image, filename)
         return 'Ok'
 

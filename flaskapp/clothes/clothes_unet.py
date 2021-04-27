@@ -15,10 +15,10 @@ class Clothes_Unet:
         self.model_path = "flaskapp/model/clothes_unet.pth"
         self.scale = 0.5
         self.out_threshold = 0.5
-        self.net = UNet(n_channels=3, n_classes=1)
-        logging.info("Loading Clothes Unet model {}".format(self.model_path))
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         logging.info(f'Using device {self.device}')
+        self.net = UNet(n_channels=3, n_classes=1)
+        logging.info("Loading Clothes Unet model {}".format(self.model_path))
         self.net.to(device=self.device)
         self.net.load_state_dict(torch.load(self.model_path, map_location=self.device))
         logging.info("Clothes Unet Model loaded !")
