@@ -100,6 +100,7 @@ class FileManager:
             os.remove(pose_path)
         if os.path.isfile(parse_path):
             os.remove(parse_path)
+        print(f"remove human - {filename}")
 
     def remove_clothes(self, filename):
         clothes_path = self.clothes_root + '/' + filename + '.png'
@@ -108,3 +109,4 @@ class FileManager:
             os.remove(clothes_path)
         if os.path.isfile(mask_path):
             os.remove(mask_path)
+        print(f"remove clothes - {filename}")

@@ -30,3 +30,5 @@ class OpenPose:
             self.filemanager.save_pose(json_data, filename)
         else:
             self.filemanager.remove_human(filename)
+            return False
+        
