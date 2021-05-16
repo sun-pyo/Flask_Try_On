@@ -20,13 +20,22 @@
             android:layout_height="300dp"
             android:layout_marginTop="150dp" />
 
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="170dp"
+            android:layout_height="37dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            />
+
 
         <Button
             android:id="@+id/buttonUploadImage"
             android:layout_width="157dp"
             android:layout_height="68dp"
             android:layout_gravity="center"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="20dp"
             android:text="Upload Image" />
     </LinearLayout>
 </RelativeLayout>

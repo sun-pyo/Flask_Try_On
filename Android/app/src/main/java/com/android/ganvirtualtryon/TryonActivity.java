@@ -27,14 +27,25 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-public class TryonActivity extends AppCompatActivity {
+  public class TryonActivity extends AppCompatActivity {
     private NetworkImageView tryon_img;
     private ImageLoader imageLoader;
 
@@ -49,7 +60,7 @@ public class TryonActivity extends AppCompatActivity {
     ImageView GridViewItems,BackSelectedItem;
     private Context mContext;
 
-
+    int c_pos, h_pos;
 
     DataManager dataManager = DataManager.get_instance();
     @Override
@@ -66,7 +77,7 @@ public class TryonActivity extends AppCompatActivity {
         gv_c.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             public void onItemClick(AdapterView<?> parent, View v, int position, long id){
 
-                ia_c.file(position);
+                ia_c.get_filename(position);
                 Log.d("click cfile",c_filename);
 
             }
@@ -80,7 +91,7 @@ public class TryonActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id){
 
                 //      ia.callImageViewer(position);
-                ia_h.file(position);
+                ia_h.get_filename(position);
                 Log.d("click hfile",h_filename);
             }
         });
@@ -90,6 +101,22 @@ public class TryonActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 loadImage(c_filename,h_filename);
+            }
+        });
+
+       findViewById(R.id.d_c).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ia_c.delete(c_pos);
+                Log.d("delbtnccc","suc");
+            }
+        });
+
+        findViewById(R.id.d_h).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ia_h.delete(h_pos);
+                Log.d("delbtnghhh","suc");
             }
         });
     }
@@ -117,21 +144,78 @@ public class TryonActivity extends AppCompatActivity {
             getThumbInfo(thumbsIDList, thumbsDataList);
         }
 
-        public void file(int selectedIndex){
-            filename = getImageInfo(imgData, geoData, thumbsIDList.get(selectedIndex));
-            String [] splited = filename.split("/");
+        public String split_filename(String filepath){
+            String [] splited = filepath.split("/");
             String b = splited[5];
             String [] a =b.split("\\.");
             Log.d("imgfilename",a[0]);
+            return a[0];
+        }
+
+        public void get_filename(int selectedIndex){
+            filename = getImageInfo(imgData, geoData, thumbsIDList.get(selectedIndex));
+            String fn = split_filename(filename);
             if(image_type.equals("clothes")) {
-                c_filename = dataManager.find_cfile(a[0]);
+                c_pos = selectedIndex;
+                c_filename = dataManager.find_cfile(fn).name;
                 Log.d("real c file",c_filename);
             }
             else if(image_type.equals("human")){
-                h_filename =dataManager.find_hfile(a[0]);
+                h_pos = selectedIndex;
+                h_filename =dataManager.find_hfile(fn).name;
                 Log.d("real h file",h_filename);
             }
 
+        }
+
+        public void delete(int selected){
+            try {
+                filename = getImageInfo(imgData, geoData, thumbsIDList.get(selected));
+
+                //   File file= new File(Environment.getExternalStorageDirectory()+ filename);
+                Log.d("del","suc");
+                Log.d("delfilename",filename);
+
+                Log.d("delreaj","sucreah");
+                //      File file = getCacheDir();  // 내부저장소 캐시 경로를 받아오기
+
+                //    File[] flist = file.listFiles();
+                File file= new File(filename);
+                if(file.exists())
+                {
+                    Log.d("selected", Integer.toString(selected));
+                    thumbsDataList.remove(selected);
+                    thumbsIDList.remove(selected);
+                    file.delete();
+
+                    String fn =  split_filename(filename);
+                    delete_image(fn);
+                    if(image_type.equals("clothes")) {
+                        dataManager.delete_cfile(fn);
+                    }
+                    else if(image_type.equals("human")){
+                        dataManager.delete_hfile(fn);
+                    }
+
+
+                    mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+                    notifyDataSetChanged();
+                }
+/*
+                for (int i = 0; i < flist.length; i++) {    // 배열의 크기만큼 반복
+                    if (flist[i].getName().equals(filename)) {
+                        Log.d("delreaeee","naebu");// 삭제하고자 하는 이름과 같은 파일명이 있으면 실행
+                        flist[i].delete();  // 파일 삭제
+                        Toast.makeText(getApplicationContext(), "파일 삭제 성공", Toast.LENGTH_SHORT).show();
+                    }
+                }*/
+            } catch (Exception e) {
+                Toast.makeText(getApplicationContext(), "파일 삭제 실패", Toast.LENGTH_SHORT).show();
+            }
+           /* if(file.exists())
+            {
+                file.delete();
+            }*/
         }
 
 
@@ -159,12 +243,13 @@ public class TryonActivity extends AppCompatActivity {
                 imageView.setAdjustViewBounds(false);
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setPadding(20, 20, 20, 20);
-             //   imageView.setColorFilter(Color.parseColor("#55ff0000"), PorterDuff.Mode.DST_ATOP);
+
             }else{
                 imageView = (ImageView) convertView;
             }
             BitmapFactory.Options bo = new BitmapFactory.Options();
             bo.inSampleSize = 8;
+            Log.d("get = ", thumbsDataList.get(position));
             Bitmap bmp = BitmapFactory.decodeFile(thumbsDataList.get(position), bo);
             Bitmap resized = Bitmap.createScaledBitmap(bmp, 95, 95, true);
             imageView.setImageBitmap(resized);
@@ -178,7 +263,7 @@ public class TryonActivity extends AppCompatActivity {
                     MediaStore.Images.Media.DISPLAY_NAME,
                     MediaStore.Images.Media.SIZE};
 
-            Cursor imageCursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            Cursor imageCursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     proj, MediaStore.Images.Media.DATA + " like ? ", new String[] {"%/" +this.gallery_path + "/%"}, null);
 
 
@@ -203,6 +288,7 @@ public class TryonActivity extends AppCompatActivity {
                     num++;
                     if (thumbsImageID != null){
                         thumbsIDs.add(thumbsID);
+                        Log.d("thumb",thumbsData.toString());
                         thumbsDatas.add(thumbsData);
                     }
                 }while (imageCursor.moveToNext());
@@ -218,7 +304,7 @@ public class TryonActivity extends AppCompatActivity {
                     MediaStore.Images.Media.DISPLAY_NAME,
                     MediaStore.Images.Media.SIZE};
 
-            Cursor imageCursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            Cursor imageCursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     proj, "_ID='"+ thumbID +"'", null, null);
 
             if (imageCursor != null && imageCursor.moveToFirst()){
@@ -230,10 +316,29 @@ public class TryonActivity extends AppCompatActivity {
             imageCursor.close();
             return imageDataPath;
         }
+
+        private void delete_image(String f_name) {
+            String url = "http://102949a2acf2.ngrok.io/" + image_type + "/" + f_name;
+            Log.d("del fname", f_name);
+            StringRequest delete_Request = new StringRequest(Request.Method.DELETE, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            //    Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                            Log.e("GotError", "" + error.getMessage());
+                        }
+                    });
+            Volley.newRequestQueue(mContext).add(delete_Request);
+        }
     }
 
     private void loadImage(String c, String h){
-        String url = "http://3c77d8d7f4ec.ngrok.io/tryon?c="+c+"&h="+h;
+        String url = "http://102949a2acf2.ngrok.io/tryon?c="+c+"&h="+h;
         Log.d("url",url);
 
         imageLoader = CustomVolleyRequest.getInstance(this.getApplicationContext())
