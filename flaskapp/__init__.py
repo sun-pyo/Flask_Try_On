@@ -24,7 +24,7 @@ acgpn = ACGPN(filemanager=filemanager)
 def hello():
     return 'Hello World!'
 
-@app.route('/inference_clothes', methods=['POST'])
+@app.route('/clothes', methods=['POST'])
 def inference_clothes():
     if request.method == 'POST':
         file = request.files['image']
@@ -39,7 +39,11 @@ def inference_clothes():
         msg = clothes_unet.predict(image, filename)
         return jsonify({'msg': msg, 'filename':filename})
 
-@app.route('/inference_human', methods=['POST'])
+@app.route('clothes/<string:filename>', methods=['DELETE'])
+def delete_clothes(filename):
+    filemanager.remove_clothes(filename)
+
+@app.route('/human', methods=['POST'])
 def inference_human():
     if request.method == 'POST':
         file = request.files['image']
@@ -55,6 +59,10 @@ def inference_human():
         # human pose estimation
         msg = openpose.predict(image, filename)
         return jsonify({'msg':msg, 'filename':filename})
+
+@app.route('human/<string:filename>', methods=['DELETE'])
+def delete_human(filename):
+    filemanager.remove_human(filename)
 
 @app.route('/tryon', methods=['GET'])
 def tryon():
