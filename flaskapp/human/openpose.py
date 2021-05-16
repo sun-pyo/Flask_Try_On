@@ -26,9 +26,9 @@ class OpenPose:
                         "hand_right_keypoints": [], 
                         "hand_left_keypoints":[],
                         }]}
-
             self.filemanager.save_pose(json_data, filename)
+            return "Success"
         else:
             self.filemanager.remove_human(filename)
-            return False
+            return "Fail"
         

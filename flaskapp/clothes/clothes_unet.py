@@ -99,4 +99,5 @@ class Clothes_Unet:
         result = self.remove_padding(np.array(result))
         
         # save clothes mask image
-        self.filemanager.save_mask(np.array(result), filename)  
+        self.filemanager.save_mask(np.array(result), filename)
+        return "Success"  

@@ -24,7 +24,7 @@ acgpn = ACGPN(filemanager=filemanager)
 def hello():
     return 'Hello World!'
 
-@app.route('/inference_clothes', methods=['POST'])
+@app.route('/clothes', methods=['POST'])
 def inference_clothes():
     if request.method == 'POST':
         file = request.files['image']
@@ -36,10 +36,15 @@ def inference_clothes():
         # save clothes image
         filemanager.save_clothes(image, filename) 
         #print(request.form.get('filename'))
-        clothes_unet.predict(image, filename)
-        return jsonify({'msg':'success', 'filename':filename})
+        msg = clothes_unet.predict(image, filename)
+        return jsonify({'msg': msg, 'filename':filename})
 
-@app.route('/inference_human', methods=['POST'])
+@app.route('/clothes/<string:filename>', methods=['DELETE'])
+def delete_clothes(filename):
+    filemanager.remove_clothes(filename)
+    return jsonify({'msg':"Delete"})
+
+@app.route('/human', methods=['POST'])
 def inference_human():
     if request.method == 'POST':
         file = request.files['image']
@@ -53,9 +58,14 @@ def inference_human():
         # human parsing
         human_parsing.predict(image, filename)
         # human pose estimation
-        openpose.predict(image, filename)
-        return jsonify({'msg':'success', 'filename':filename})
+        msg = openpose.predict(image, filename)
+        return jsonify({'msg':msg, 'filename':filename})
 
+@app.route('/human/<string:filename>', methods=['DELETE'])
+def delete_human(filename):
+    filemanager.remove_human(filename)
+    return jsonify({'msg':"Delete"})
+    
 @app.route('/tryon', methods=['GET'])
 def tryon():
     c_name = request.args.get('c')

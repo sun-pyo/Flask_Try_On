@@ -26,14 +26,14 @@ class FileManager:
         return cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
     def get_clothes_filename(self):
-        filename = self.clothes_name
+        filename = 'img_c' + str(self.clothes_name)
         self.clothes_name += 1
-        return str(filename)
+        return filename
 
     def get_human_filename(self):
-        filename = self.human_name
+        filename = 'img_h' + str(self.human_name)
         self.human_name += 1
-        return str(filename)
+        return filename
 
     def save_clothes(self, image, filename):
         clothes_path = self.clothes_root + '/' + filename + '.png'
