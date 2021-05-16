@@ -36,8 +36,8 @@ def inference_clothes():
         # save clothes image
         filemanager.save_clothes(image, filename) 
         #print(request.form.get('filename'))
-        clothes_unet.predict(image, filename)
-        return jsonify({'msg':'success', 'filename':filename})
+        msg = clothes_unet.predict(image, filename)
+        return jsonify({'msg': msg, 'filename':filename})
 
 @app.route('/inference_human', methods=['POST'])
 def inference_human():
