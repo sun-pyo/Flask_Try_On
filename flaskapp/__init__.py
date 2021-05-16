@@ -39,7 +39,7 @@ def inference_clothes():
         msg = clothes_unet.predict(image, filename)
         return jsonify({'msg': msg, 'filename':filename})
 
-@app.route('clothes/<string:filename>', methods=['DELETE'])
+@app.route('/clothes/<string:filename>', methods=['DELETE'])
 def delete_clothes(filename):
     filemanager.remove_clothes(filename)
 
@@ -60,7 +60,7 @@ def inference_human():
         msg = openpose.predict(image, filename)
         return jsonify({'msg':msg, 'filename':filename})
 
-@app.route('human/<string:filename>', methods=['DELETE'])
+@app.route('/human/<string:filename>', methods=['DELETE'])
 def delete_human(filename):
     filemanager.remove_human(filename)
 
