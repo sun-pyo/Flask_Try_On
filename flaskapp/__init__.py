@@ -53,8 +53,8 @@ def inference_human():
         # human parsing
         human_parsing.predict(image, filename)
         # human pose estimation
-        openpose.predict(image, filename)
-        return jsonify({'msg':'success', 'filename':filename})
+        msg = openpose.predict(image, filename)
+        return jsonify({'msg':msg, 'filename':filename})
 
 @app.route('/tryon', methods=['GET'])
 def tryon():
