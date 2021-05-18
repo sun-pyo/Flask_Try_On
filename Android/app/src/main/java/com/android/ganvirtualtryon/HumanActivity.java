@@ -47,12 +47,14 @@ import java.util.Map;
 
 public class HumanActivity extends AppCompatActivity {
 
-    private static final String HUMAN_URL = "http://3c77d8d7f4ec.ngrok.io/inference_human";
+    private static final String HUMAN_URL = "http://102949a2acf2.ngrok.io/human";
     private static final int REQUEST_PERMISSIONS = 100;
     private static final int PICK_IMAGE_REQUEST =1 ;
     private Bitmap bitmap;
     private String filePath;
     ImageView human_img;
+
+    TextView text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,17 +62,20 @@ public class HumanActivity extends AppCompatActivity {
         setContentView(R.layout.activity_human);
         // human imageview
         human_img =  findViewById(R.id.human_image);
+        text = findViewById(R.id.text);
 
         //upload button click시
         findViewById(R.id.buttonImage).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 if ((ContextCompat.checkSelfPermission(getApplicationContext(),
                         Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(getApplicationContext(),
                         Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
                     if ((ActivityCompat.shouldShowRequestPermissionRationale(HumanActivity.this,
                             Manifest.permission.WRITE_EXTERNAL_STORAGE)) && (ActivityCompat.shouldShowRequestPermissionRationale(HumanActivity.this,
                             Manifest.permission.READ_EXTERNAL_STORAGE))) {
+                            text.setText(" ");
 
                     } else {
                         ActivityCompat.requestPermissions(HumanActivity.this,
@@ -78,6 +83,8 @@ public class HumanActivity extends AppCompatActivity {
                                 REQUEST_PERMISSIONS);
                     }
                 } else {
+                 //   text.setText("이미지 업로드중!");
+                    text.setText(" ");
                     Log.e("Else", "Else");
                     showFileChooser();
                 }
@@ -117,6 +124,7 @@ public class HumanActivity extends AppCompatActivity {
                     //server에 사진 upload
                     uploadBitmap(bitmap);
                     human_img.setImageBitmap(bitmap);
+                    text.setText("이미지 업로드중!");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -210,19 +218,27 @@ public class HumanActivity extends AppCompatActivity {
                 new Response.Listener<NetworkResponse>() {
                     @Override
                     public void onResponse(NetworkResponse response) {
+                        //text.setText("이미지 업로드중!");
                         try {
                             JSONObject obj = new JSONObject(new String(response.data));
-                            Toast.makeText(getApplicationContext(), obj.toString(), Toast.LENGTH_SHORT).show();
+                          //  Toast.makeText(getApplicationContext(), obj.toString(), Toast.LENGTH_SHORT).show();
 
                             String newfilename;
 
                             Log.d("obj",obj.getString("filename"));
                             Log.d("obj to string",obj.toString());
 
+
                             // server에서 저장되는 이름(ex>img_h0)으로 사진이 저장됨
-                            newfilename = saveImageBitmap(bitmap,obj.getString("filename"));
-                            DataManager datamanager = DataManager.get_instance();
-                            datamanager.add_hlist(new Data(newfilename,obj.getString("filename")));
+                            if(obj.getString("msg").equals("Success")) {
+                                newfilename = saveImageBitmap(bitmap, obj.getString("filename"));
+                                DataManager datamanager = DataManager.get_instance();
+                                datamanager.add_hlist(new Data(newfilename, obj.getString("filename")));
+                                text.setText("이미지 업로드 성공!");
+                            }
+                            else if (obj.getString("msg").equals("Fail")){
+                                text.setText("이미지 업로드 실패!");
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

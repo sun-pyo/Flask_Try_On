@@ -29,30 +29,34 @@ public class DataManager implements Serializable {
         h_list.add(data);
     }
 
-    public String find_cfile(String path){
-        String c = "";
+    public Data find_cfile(String path){
+        Data c = null;
         Log.d("data_cimagepath",path);
         for(Data c_data : c_list){
             if(c_data.name.equals(path)){
-                c = c_data.name;
-                Log.d("same_data_c",c);
+                c = c_data;
                 Log.d("same_data_c_path",c_data.path);
             }
         }
         Log.d("data_c_suc","c success");
         return c;
     }
+    public void delete_cfile(String filename){
+        c_list.remove(find_cfile(filename));
+    }
 
-    public String find_hfile(String path){
-        String h = "";
+    public Data find_hfile(String path){
+        Data h = null;
         for(Data h_data : h_list){
             if(h_data.name.equals(path)){
-                h = h_data.name;
-                Log.d("same_data_h",h);
+                h = h_data;
                 Log.d("same_data_h_path",h_data.path);
             }
         }
         Log.d("data_h_suc","h success");
         return h;
+    }
+    public void delete_hfile(String filename){
+        h_list.remove(find_hfile(filename));
     }
 }

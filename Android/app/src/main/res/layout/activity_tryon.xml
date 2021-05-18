@@ -41,11 +41,18 @@
 
             <ImageView
                 android:layout_width="80dp"
-                android:layout_height="150dp"
-                android:layout_marginLeft="1dp"
-                android:layout_marginTop="5dp"
+                android:layout_height="107dp"
                 android:layout_gravity="center"
+                android:layout_marginLeft="1dp"
                 android:src="@drawable/clothing1" />
+
+            <Button
+                android:id="@+id/d_c"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:text="DELETE" />
 
 
         </LinearLayout>
@@ -76,6 +83,14 @@
                 android:layout_height="126dp"
                 android:layout_gravity="center"
                 android:src="@drawable/woman" />
+
+            <Button
+                android:id="@+id/d_h"
+                android:layout_marginLeft="5dp"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DELETE" />
 
 
         </LinearLayout>
@@ -117,6 +132,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Try On!" />
+
+
 
 
 </LinearLayout>
