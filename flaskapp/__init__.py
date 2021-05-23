@@ -66,7 +66,7 @@ def delete_human(filename):
     filemanager.remove_human(filename)
     return jsonify({'msg':"Delete"})
     
-@app.route('/tryon', methods=['GET'])
+@app.route('/result', methods=['GET'])
 def tryon():
     c_name = request.args.get('c')
     h_name = request.args.get('h')
