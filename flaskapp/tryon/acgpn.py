@@ -12,8 +12,7 @@ SIZE = 320
 NC = 14
 
 class ACGPN():
-    def __init__(self, filemanager):
-        self.filemanager = filemanager
+    def __init__(self):
         self.model_root = "flaskapp/model"
         self.opt = TestOptions().parse()
         self.opt.model_root = self.model_root
@@ -23,13 +22,12 @@ class ACGPN():
         self.fine_width = 192
         self.radius = 5
 
-    def get_data(self, c_name, h_name):
-        clothes = self.filemanager.load_clothes(c_name)
-        mask = self.filemanager.load_mask(c_name)
-
-        human = self.filemanager.load_human(h_name)
-        parse = self.filemanager.load_human_parse(h_name)
-        pose_data = self.filemanager.load_pose(h_name)
+    def get_data(self, input_data):
+        clothes = input_data['clothes']
+        mask = input_data['mask']
+        human = input_data['human']
+        parse = input_data['parse']
+        pose_data = input_data['pose']
 
         params = get_params(self.opt, parse.size)
 
@@ -75,8 +73,8 @@ class ACGPN():
 
         return input_dict
 
-    def predict(self, c_name, h_name):
-        data = self.get_data(c_name, h_name)
+    def predict(self, input_data):
+        data = self.get_data(input_data)
         mask_clothes = torch.FloatTensor(
         (data['parse'].cpu().numpy() == 4).astype(np.int))
         mask_fore = torch.FloatTensor(

@@ -12,8 +12,7 @@ from collections import OrderedDict
 from .networks.AugmentCE2P import resnet101
 
 class Human_Parsing:
-    def __init__(self, filemanager):
-        self.filemanager = filemanager
+    def __init__(self):
         self.input_size = [473, 473]
         self.aspect_ratio = self.input_size[1] * 1.0 / self.input_size[0]
         num_class = 20
@@ -96,7 +95,7 @@ class Human_Parsing:
 
 
 
-    def predict(self, img, filename):
+    def predict(self, img):
         with torch.no_grad():
             image, meta = self.get_data(img)
             c = meta['center']
@@ -120,5 +119,4 @@ class Human_Parsing:
                 new_arr = np.where(output_arr == old, new, new_arr)
             output_img = Image.fromarray(np.asarray(new_arr, dtype=np.uint8))
 
-            self.filemanager.save_human_parsing(output_img, filename)
-            return
+            return output_img

@@ -15,10 +15,10 @@ app = Flask(__name__)
 run_with_ngrok(app)
 
 filemanager = FileManager()
-clothes_unet = Clothes_Unet(filemanager=filemanager)
-openpose = OpenPose(filemanager=filemanager)
-human_parsing = Human_Parsing(filemanager=filemanager)
-acgpn = ACGPN(filemanager=filemanager)
+clothes_unet = Clothes_Unet()
+openpose = OpenPose()
+human_parsing = Human_Parsing()
+acgpn = ACGPN()
 
 @app.route('/')
 def hello():
@@ -35,8 +35,13 @@ def inference_clothes():
         image = filemanager.bytes_image_open(img_bytes)
         # save clothes image
         filemanager.save_clothes(image, filename) 
-        #print(request.form.get('filename'))
-        msg = clothes_unet.predict(image, filename)
+
+        # Generate clotehs mask
+        clothes_mask = clothes_unet.predict(image, filename)
+        # save clothes mask image
+        filemanager.save_mask(clothes_mask, filename)
+
+        msg = "Success"
         return jsonify({'msg': msg, 'filename':filename})
 
 @app.route('/clothes/<string:filename>', methods=['DELETE'])
@@ -55,10 +60,21 @@ def inference_human():
         image = filemanager.bytes_image_open(img_bytes)
         # human image save
         filemanager.save_human(image, filename)
+
         # human parsing
-        human_parsing.predict(image, filename)
+        output_parsing = human_parsing.predict(image)
+        # save output
+        filemanager.save_human_parsing(output_parsing, filename)
+
         # human pose estimation
-        msg = openpose.predict(image, filename)
+        json_data = openpose.predict(image)
+        if json_data == None:
+            filemanager.remove_human(filename)
+            msg = "Fail"
+        else:
+            filemanager.save_pose(json_data, filename)
+            msg = "Success"
+
         return jsonify({'msg':msg, 'filename':filename})
 
 @app.route('/human/<string:filename>', methods=['DELETE'])
@@ -70,7 +86,18 @@ def delete_human(filename):
 def tryon():
     c_name = request.args.get('c')
     h_name = request.args.get('h')
-    output = acgpn.predict(c_name, h_name)
+
+    try:
+        clothes = filemanager.load_clothes(c_name)
+        mask = filemanager.load_mask(c_name)
+        human = filemanager.load_human(h_name)
+        parse = filemanager.load_human_parse(h_name)
+        pose = filemanager.load_pose(h_name)
+    except FileNotFoundError:
+        return jsonify({'msg':"Fail", 'clothes_filename':c_name, 'humna_filename' : h_name})
+    input_data = {'clothes' : clothes, 'mask' : mask, 'human' : human, 'parse':parse, 'pose' : pose}
+
+    output = acgpn.predict(input_data)
     
     img_str = cv2.imencode('.png', output)[1].tostring()
     f = io.BytesIO()

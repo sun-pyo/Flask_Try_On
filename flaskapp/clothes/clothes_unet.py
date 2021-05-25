@@ -10,8 +10,7 @@ from torchvision import transforms
 from .unet import UNet
 
 class Clothes_Unet:
-    def __init__(self, filemanager):
-        self.filemanager = filemanager
+    def __init__(self):
         self.model_path = "flaskapp/model/clothes_unet.pth"
         self.scale = 0.5
         self.out_threshold = 0.5
@@ -86,7 +85,7 @@ class Clothes_Unet:
             full_mask = probs.squeeze().cpu().numpy()
         return full_mask > self.out_threshold
 
-    def predict(self, img, filename):
+    def predict(self, img):
         # resize (256,256)
         img = self.img_resize(np.array(img))
 
@@ -98,6 +97,4 @@ class Clothes_Unet:
         # resize (192, 256)
         result = self.remove_padding(np.array(result))
         
-        # save clothes mask image
-        self.filemanager.save_mask(np.array(result), filename)
-        return "Success"  
+        return np.array(result)  

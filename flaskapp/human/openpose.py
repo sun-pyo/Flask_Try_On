@@ -5,11 +5,10 @@ from openpose.body.estimator import BodyPoseEstimator
 
 
 class OpenPose:
-    def __init__(self, filemanager):
+    def __init__(self):
         self.model = BodyPoseEstimator(pretrained=True)
-        self.filemanager = filemanager
 
-    def predict(self, image, filename):
+    def predict(self, image):
         keypoints = self.model(image)
         pose_keypoints = []
 
@@ -26,9 +25,7 @@ class OpenPose:
                         "hand_right_keypoints": [], 
                         "hand_left_keypoints":[],
                         }]}
-            self.filemanager.save_pose(json_data, filename)
-            return "Success"
+            return json_data 
         else:
-            self.filemanager.remove_human(filename)
-            return "Fail"
+            return None
         
