@@ -37,7 +37,7 @@ def inference_clothes():
         filemanager.save_clothes(image, filename) 
 
         # Generate clotehs mask
-        clothes_mask = clothes_unet.predict(image, filename)
+        clothes_mask = clothes_unet.predict(image)
         # save clothes mask image
         filemanager.save_mask(clothes_mask, filename)
 
