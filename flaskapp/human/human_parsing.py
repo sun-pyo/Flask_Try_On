@@ -16,7 +16,7 @@ class Human_Parsing:
         self.input_size = [473, 473]
         self.aspect_ratio = self.input_size[1] * 1.0 / self.input_size[0]
         num_class = 20
-        self.model_path = "flaskapp/model/human_parsing.pth"
+        self.model_path = "/content/Flask_Try_On/flaskapp/model/human_parsing.pth"
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         logging.info(f'Using device {self.device}')
 
@@ -33,17 +33,17 @@ class Human_Parsing:
         self.model.eval()
 
         self.trans_dict = {
-            0:0,
-            1:1, 2:1,
-            5:4, 6:4, 7:4, 
-            18:5,
-            19:6,
-            9:8, 12:8,
-            16:9,
-            17:10,
-            14:11,
-            4:12, 13:12,
-            15:13
+            0:0,   # Background -> Background
+            1:1, 2:1,  # Hat, Hair -> Hair
+            5:4, 6:4, 7:4,  # Upclothes, Dress, Coat -> Upclothes
+            18:5, # Left_shoe -> Left-shoe
+            19:6, # Right_shoe -> Right-shoe
+            9:8, 12:8, # Pants, Skirt -> Pants
+            16:9, # Left_leg -> Left_leg
+            17:10, # Right_leg -> Right_leg
+            14:11, # Left_arm -> Left_arm
+            4:12, 13:12, # Sunglasses, Face -> Face
+            15:13 # Right_arm -> Right_arm
         }
 
         self.transform = transforms.Compose([

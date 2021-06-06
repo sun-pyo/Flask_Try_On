@@ -1,4 +1,4 @@
-from . import conftest
+from Flask_Try_On.test import conftest
 
 # 정상적인 이미지 확인
 def test_human_post(client, clothes_image):

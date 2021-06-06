@@ -7,11 +7,12 @@ import os
 
 class FileManager:
     def __init__(self):
-        self.human_root = "flaskapp/img/human"
-        self.parse_root = "flaskapp/img/parse"
-        self.clothes_root = "flaskapp/img/clothes"
-        self.mask_root = "flaskapp/img/mask"
-        self.pose_root = "flaskapp/img/pose"
+        self.root = "/content/Flask_Try_On/flaskapp/img"
+        self.human_root = os.path.join(self.root, "human")
+        self.parse_root = os.path.join(self.root, "parse")
+        self.clothes_root = os.path.join(self.root, "clothes")
+        self.mask_root = os.path.join(self.root, "mask")
+        self.pose_root =  os.path.join(self.root, "pose")
         
         # self.human_file_list = []
         # self.clothes_file_list = []

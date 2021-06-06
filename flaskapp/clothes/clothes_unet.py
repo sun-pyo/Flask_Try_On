@@ -11,7 +11,7 @@ from .unet import UNet
 
 class Clothes_Unet:
     def __init__(self):
-        self.model_path = "flaskapp/model/clothes_unet.pth"
+        self.model_path = "/content/Flask_Try_On/flaskapp/model/clothes_unet.pth"
         self.scale = 0.5
         self.out_threshold = 0.5
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

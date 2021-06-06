@@ -13,7 +13,7 @@ NC = 14
 
 class ACGPN():
     def __init__(self):
-        self.model_root = "flaskapp/model"
+        self.model_root = "/content/Flask_Try_On/flaskapp/model"
         self.opt = TestOptions().parse()
         self.opt.model_root = self.model_root
         self.model = InferenceModel()
