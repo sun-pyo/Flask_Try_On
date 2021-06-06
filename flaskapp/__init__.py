@@ -27,8 +27,11 @@ def hello():
 @app.route('/clothes', methods=['POST'])
 def inference_clothes():
     if request.method == 'POST':
-        file = request.files['image']
-        img_bytes = file.read()
+        try:
+            file = request.files['image']
+            img_bytes = file.read()
+        except:
+            return jsonify({'msg': "Fail"})
         # get clothes filename
         filename = filemanager.get_clothes_filename()  
         # RGB image load
@@ -52,8 +55,11 @@ def delete_clothes(filename):
 @app.route('/human', methods=['POST'])
 def inference_human():
     if request.method == 'POST':
-        file = request.files['image']
-        img_bytes = file.read()
+        try:
+            file = request.files['image']
+            img_bytes = file.read()
+        except:
+            return jsonify({'msg': "Fail"})
         # get human filename
         filename = filemanager.get_human_filename() 
         # RGB image load
@@ -84,8 +90,11 @@ def delete_human(filename):
     
 @app.route('/result', methods=['GET'])
 def tryon():
-    c_name = request.args.get('c')
-    h_name = request.args.get('h')
+    try:
+        c_name = request.args.get('c')
+        h_name = request.args.get('h')
+    except:
+        return jsonify({'msg': "Fail"})
 
     try:
         clothes = filemanager.load_clothes(c_name)
@@ -95,6 +104,7 @@ def tryon():
         pose = filemanager.load_pose(h_name)
     except FileNotFoundError:
         return jsonify({'msg':"Fail", 'clothes_filename':c_name, 'humna_filename' : h_name})
+
     input_data = {'clothes' : clothes, 'mask' : mask, 'human' : human, 'parse':parse, 'pose' : pose}
 
     output = acgpn.predict(input_data)
