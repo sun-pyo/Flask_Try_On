@@ -17,9 +17,11 @@ def test_clothes_post(client, clothes_image):
     assert response.status_code == 200
     assert json['msg'] == "Success"
 
-# 잘못된 데이터 전송
-def test_clothes_post_None(client):
-    data = None
+# 이미지가 아닌 데이터 전송
+def test_clothes_post_NotImage(client):
+    data = {
+        'image' : "None"
+    }
     response = client.post(
         '/clothes',
         data = data
@@ -45,9 +47,9 @@ def test_clothes_delete(client, clothes_image):
     
     assert response.status_code == 200
     assert json['msg'] == "Success"
+    filename = json['filename']
 
-
-    response = client.delete('/clothes/img_c0')
+    response = client.delete('/clothes/' + filename)
     json = response.get_json()
 
     assert response.status_code == 200

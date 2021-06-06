@@ -13,6 +13,13 @@ def clothes_image():
     return FileStorage(stream=fileobj, filename=filename, content_type="image")
 
 @pytest.fixture
+def clothes_image2():
+    filename = 'clothes104.png'
+    fileobj = open('Flask_Try_On/test/'+filename, 'rb')
+    return FileStorage(stream=fileobj, filename=filename, content_type="image")
+
+
+@pytest.fixture
 def human_image1():
     filename = 'h1.png'
     fileobj = open('Flask_Try_On/test/'+filename, 'rb')
